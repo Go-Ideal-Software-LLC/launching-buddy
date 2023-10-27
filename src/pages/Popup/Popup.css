@@ -1,0 +1,46 @@
+.launch-buddy-popup-container {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  text-align: center;
+  height: 100%;
+  padding: 10px;
+  background-color: #282c34;
+}
+
+.launch-buddy-popup-container-logo {
+  height: 30vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .launch-buddy-popup-container-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.launch-buddy-popup-container-header {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.launch-buddy-popup-container-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
