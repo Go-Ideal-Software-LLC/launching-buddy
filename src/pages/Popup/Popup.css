@@ -8,6 +8,39 @@
   height: 100%;
   padding: 10px;
   background-color: #282c34;
+  height: 100%;
+}
+
+.launch-buddy-popup-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.launch-buddy-app-container {
+  height: 1000px;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+}
+
+.launch-buddy-popup-container__start-button {
+  padding-top: 20px;
+}
+
+.launch-buddy-popup-container__product-url {
+  padding-top: 20px;
+}
+
+.launch-buddy-popup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: auto;
 }
 
 .launch-buddy-popup-container-logo {

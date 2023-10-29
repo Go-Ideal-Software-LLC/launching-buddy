@@ -1,42 +1,100 @@
-import { printLine } from './modules/print';
-import { MESSAGES } from '../../utils/MESSAGES_CONST';
+import { MESSAGES, RESPONSES, STORAGE_KEYS } from '../../utils/MESSAGES_CONST';
 
-console.log('Content script works!');
-console.log('Must reload extension for modifications to take effect.');
+console.log('Content script loaded');
 
-printLine("Using the 'printLine' function from the Print Module");
+
+type FollowerProfile = {
+    profileURL: string;
+    name: string;
+}
+
+const getCurrentFollowerName = async () => {
+    const followers = await chrome.storage.local.get([STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS]);
+    const currentFollowerIndex = await chrome.storage.local.get([STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]);
+    const index = currentFollowerIndex[STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX];
+    const currentFollower = followers[STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS][index] as FollowerProfile;
+    return currentFollower.name
+}
+
+const navigateToFollowerProfile = async (sendResponse: (response?: any) => void) => {
+    const followers = await chrome.storage.local.get([STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS]);
+    const currentFollowerIndex = await chrome.storage.local.get([STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]);
+    let currentFollowerIndexNum = 0;
+    console.log('currentFollowerIndex:', currentFollowerIndex);
+    if (currentFollowerIndex[STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX] === undefined) {
+        await chrome.storage.local.set({ [STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]: currentFollowerIndexNum });
+    } else {
+        currentFollowerIndexNum = currentFollowerIndex[STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX] + 1;
+        await chrome.storage.local.set({ [STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]: currentFollowerIndexNum });
+    }
+    const allFollowersProfiles = followers[STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS] as FollowerProfile[];
+    const followerToMessage = allFollowersProfiles[currentFollowerIndexNum];
+    console.log('followerToMessage:', followerToMessage);
+    if (followerToMessage) {
+        sendResponse(RESPONSES.NAVIGATED_TO_FOLLOWER_PRODUCTHUNT_PROFILE);
+        window.location.href = followerToMessage.profileURL;
+    } else {
+        sendResponse(RESPONSES.COMPLETED_ALL_FOLLOWERS);
+    }
+}
+
+const navigateToTwitterProfile = (sendResponse: (response?: any) => void) => {
+    const twitterProfileURLAnchorTag = document.querySelector('a[href*="twitter.com"], a[href*="x.com"]') as HTMLAnchorElement;
+    if (twitterProfileURLAnchorTag) {
+        sendResponse(RESPONSES.SUCCESSFULLY_NAVIGATED_TO_TWITTER_PROFILE);
+        window.location.href = twitterProfileURLAnchorTag.href; // do the twitter messaging stuff
+    } else {
+        sendResponse(RESPONSES.NO_TWITTER_PROFILE_FOUND);
+        // no twitter profile move on to the next follower
+    }
+}
+
+const selectTwitterDMIcon = (sendResponse: (response?: any) => void) => {
+    // we probably need to add some sort of onPage load listener here
+    const twitterDMIcon = document.querySelector('[data-testid="sendDMFromProfile"]') as HTMLAnchorElement;
+    if (twitterDMIcon) {
+        twitterDMIcon.click();
+        sendResponse(RESPONSES.SUCCESSFULLY_SELECTED_TWITTER_DM_ICON);
+    } else {
+        sendResponse(RESPONSES.NO_TWITTER_DM_ICON_FOUND);
+    }
+}
+
+const selectTwitterDMTextInput = async (sendResponse: (response?: any) => void) => {
+    const twitterDMTextStorage = await chrome.storage.local.get([STORAGE_KEYS.TWITTER_DM_TEXT]);
+    const twitterDMText = twitterDMTextStorage[STORAGE_KEYS.TWITTER_DM_TEXT] as string;
+    const rootDiv = document.querySelector(
+        ".public-DraftEditorPlaceholder-inner"
+    );
+    // Simulate a click event on the element
+    var event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+    });
+    const currentFollowerName = await getCurrentFollowerName();
+    const twitterDM = twitterDMText.replace(/{{FIRST_NAME}}/g, currentFollowerName);
+    rootDiv?.dispatchEvent(event);
+    document.execCommand("insertText", false, twitterDM);
+    sendResponse(RESPONSES.SENT_TWITTER_DM);
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.message === MESSAGES.NAVIGATE_TO_PROFILE) {
-        const timeoutForNavigatingToProfile = setTimeout(() => {
-            console.log('Content script is starting to message followers');
-            sendResponse('Content script received message and is starting to message followers');
-            const selectedProfilePicture = document.querySelector('#__next > div.styles_header__8GQde.flex.direction-row.flex-row-gap-5.flex-row-gap-mobile-undefined.flex-row-gap-widescreen-8.py-5.px-mobile-5.px-desktop-5.px-widescreen-8.px-tablet-5.align-center.bg-white > div.styles_hideOnSearch__QXQwf.flex.direction-row.flex-row-gap-5.flex-row-gap-mobile-undefined.flex-row-gap-widescreen-8.align-center > div:nth-child(3) > div:nth-child(1) > a') as HTMLAnchorElement;
-            if (selectedProfilePicture) {
-                const followerLink = selectedProfilePicture.href + '/followers'
-                window.location.href = followerLink;
-            }
-            clearTimeout(timeoutForNavigatingToProfile);
-        }, 3000);
+    if (message.message === MESSAGES.NAVIGATE_TO_PROFILE_FOLLOWERS) {
+        console.log('Content script is trying to navigate to the profile');
+        const selectedProfilePicture = document.querySelector('#__next > div.styles_header__8GQde.flex.direction-row.flex-row-gap-5.flex-row-gap-mobile-undefined.flex-row-gap-widescreen-8.py-5.px-mobile-5.px-desktop-5.px-widescreen-8.px-tablet-5.align-center.bg-white > div.styles_hideOnSearch__QXQwf.flex.direction-row.flex-row-gap-5.flex-row-gap-mobile-undefined.flex-row-gap-widescreen-8.align-center > div:nth-child(3) > div:nth-child(1) > a') as HTMLAnchorElement;
+        if (selectedProfilePicture) {
+            // reset the follower index
+            chrome.storage.local.set({ [STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]: 0 });
+            chrome.storage.local.set({ [STORAGE_KEYS.TWITTER_DM_TEXT]: message.twitterDmText });
+            const followerLink = selectedProfilePicture.href + '/followers';
+            sendResponse(RESPONSES.SUCCESSFULLY_NAVIGATED_TO_USER_PRODUCTHUNT_PROFILE);
+            window.location.href = followerLink;
+        }
     }
-    // if (message.message === MESSAGES.NAVIGATE_TO_FOLLOWERS) {
-    //     console.log('Content script is navigating to followers');
-    //     const xpath = '//*[@id="__next"]/div[2]/div/header/div[1]/div/div/header/div/div[2]/div[2]/div/a[1]';
-    //     const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    //     const element = result.singleNodeValue as HTMLElement;
-    //     console.log('element:', element);
-    //     if (element) {
-    //         element.click();
-    //     }
-    // }
-    if (message.message === MESSAGES.SCROLL_ALL_FOLLOWERS) {
-        // write javascript to keep scrolling down a dynamic page
-        // until all followers are loaded
+    else if (message.message === MESSAGES.SCROLL_ALL_FOLLOWERS) {
         console.log('Content script is scrolling down the page');
         const xpathForFollowerContainerDiv = '//*[@id="__next"]/div[3]/main/div[1]/div[2]';
-
-
-        sendResponse('Content script received message and is scrolling down the page');
         let lastFollowerCount = -1;
         let currentFollowerCount = 0;
         // Wait for more content to load (if any), then scroll again
@@ -49,19 +107,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (lastFollowerCount !== currentFollowerCount) {
                 window.scrollTo(0, document.body.scrollHeight);
             } else {
-                // store all followers in storage here
-                console.log('Reached the end of the page');
+                const allFollowersProfiles: FollowerProfile[] = [];
                 clearInterval(scrollToEndOfFollowersInterval);
                 followerContainerDiv.childNodes.forEach((childNode) => {
                     const followerDiv = childNode as HTMLElement;
                     const profileAnchor = followerDiv.querySelector('div:nth-child(2) > a') as HTMLAnchorElement;
-                    console.log('profileURL:', profileAnchor);
-                    console.log('profileURL: ', profileAnchor.href);
                     const divWithName = profileAnchor.childNodes[0].textContent as string;
-                    console.log('divWithName:', divWithName.trim().split(' ')[0]);
+                    allFollowersProfiles.push({
+                        profileURL: profileAnchor.href,
+                        name: divWithName.trim().split(' ')[0]
+                    });
                 });
+                chrome.storage.local.set({ [STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS]: allFollowersProfiles });
+                sendResponse(RESPONSES.SAVED_ALL_FOLLOWERS);
             }
         }, 3000);
     }
+
+    else if (message.message === MESSAGES.NAVIGATE_TO_FOLLOWERS_PROFILES) {
+        navigateToFollowerProfile(sendResponse);
+    }
+    else if (message.message === MESSAGES.NAVIGATE_TO_TWITTER_PROFILE) {
+        navigateToTwitterProfile(sendResponse);
+    }
+    else if (message.message === MESSAGES.SELECT_TWITTER_DM_ICON) {
+        selectTwitterDMIcon(sendResponse);
+    }
+    else if (message.message === MESSAGES.SEND_TWITTER_DM) {
+        selectTwitterDMTextInput(sendResponse);
+    }
+    return true;
 }
 );

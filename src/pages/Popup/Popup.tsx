@@ -1,71 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import logo from '../../assets/img/launching-buddy-logo.png';
 import { MESSAGES } from '../../utils/MESSAGES_CONST';
 import './Popup.css';
 
 const Popup = () => {
-  const [url, setUrl] = useState<string>("");
+  const [urlOfProduct, setURLOfProduct] = useState<string>("");
 
   const navigateToProductHunt = async () => {
-    // console.log('window.location.href:', window.location.href);
-    // return window.location.href.includes("producthunt.com");
     await chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       let currentTabId = tabs[0].id as number;
       chrome.tabs.update(currentTabId, { url: "https://www.producthunt.com" });
-      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-        if (info.status === 'complete' && tabId === currentTabId) {
-          chrome.tabs.onUpdated.removeListener(listener);
-          navigateToProfile();
-        }
-      });
+      chrome.runtime.sendMessage({ message: MESSAGES.NAVIGATE_TO_PROFILE_SERVICE_WORKER, twitterDmText: urlOfProduct });
     });
   }
 
-  const scrollDownAllFollowers = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      let currentTabId = tabs[0].id as number;
-      chrome.tabs.sendMessage(currentTabId, { message: MESSAGES.SCROLL_ALL_FOLLOWERS });
-      //   chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-      //     if (info.status === 'complete' && tabId === currentTabId) {
-      //       chrome.tabs.onUpdated.removeListener(listener);
-      //       scrollDownAllFollowers();
-      //     }
-      //   });
-    });
-  }
-
-  // const navigateToFollowers = () => {
-  //   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-  //     let currentTabId = tabs[0].id as number;
-  //     chrome.tabs.sendMessage(currentTabId, { message: MESSAGES.NAVIGATE_TO_FOLLOWERS });
-  //     chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-  //       if (info.status === 'complete' && tabId === currentTabId) {
-  //         chrome.tabs.onUpdated.removeListener(listener);
-  //         scrollDownAllFollowers();
-  //       }
-  //     });
-  //   });
-  // }
-
-  const navigateToProfile = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      let currentTabId = tabs[0].id as number;
-      chrome.tabs.sendMessage(currentTabId, { message: MESSAGES.NAVIGATE_TO_PROFILE });
-      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-        if (info.status === 'complete' && tabId === currentTabId) {
-          chrome.tabs.onUpdated.removeListener(listener);
-          scrollDownAllFollowers();
-        }
-      });
-    });
+  const onProductURLChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setURLOfProduct(event.target.value);
   }
 
   return (
     <div className="launch-buddy-popup-container">
-      {/* <img src={logo} className="launch-buddy-popup-logo" alt="logo" />
-      <Greetings /> */}
-      <button onClick={(event) => navigateToProductHunt()}>Navigate to Product Hunt</button>
-      {/* <button onClick={(event) => startMessagingFollowers}>Start Messaging Followerss</button> */}
-
+      <img src={logo} className="launch-buddy-popup-logo" alt="logo" />
+      <div className='launch-buddy-popup-container__product-url'>
+        <textarea className='' placeholder="https://www.producthunt.com/posts/launching-buddy" value={urlOfProduct} onChange={(event) => onProductURLChange(event)}></textarea>
+      </div>
+      <div className={`launch-buddy-popup-container__start-button`}>
+        <button disabled={urlOfProduct.length === 0} className='' onClick={(event) => navigateToProductHunt()}>Start Messaging Campaign</button>
+      </div>
     </div>
   );
 };
