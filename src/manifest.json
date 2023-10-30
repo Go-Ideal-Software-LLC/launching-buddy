@@ -2,13 +2,11 @@
   "manifest_version": 3,
   "name": "Launching Buddy",
   "description": "A chrome extension that automatically messages all of your ProductHunt followers on Twitter",
-  "options_page": "options.html",
   "background": {
     "service_worker": "background.bundle.js"
   },
   "permissions": [
     "tabs",
-    "activeTab",
     "storage"
   ],
   "action": {
@@ -21,9 +19,10 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*/*",
-        "https://*/*",
-        "<all_urls>"
+        "https://producthunt.com/*",
+        "https://www.producthunt.com/*",
+        "https://twitter.com/*",
+        "https://www.twitter.com/*"
       ],
       "js": [
         "contentScript.bundle.js"
@@ -33,7 +32,6 @@
       ]
     }
   ],
-  "devtools_page": "devtools.html",
   "web_accessible_resources": [
     {
       "resources": [
