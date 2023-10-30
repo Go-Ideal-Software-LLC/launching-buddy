@@ -87,7 +87,7 @@ const navigateToProductHunt = (sendResponse: (response?: any) => void) => {
     window.location.href = "https://www.producthunt.com";
 }
 
-const displaySuccessfulCompletedDiv = () => {
+const displaySuccessfulCompletedDiv = (sendResponse: (response?: any) => void) => {
     let div = document.createElement('div');
 
     // Set the div's style properties
@@ -108,6 +108,39 @@ const displaySuccessfulCompletedDiv = () => {
 
     // Append the div to the body
     document.body.appendChild(div);
+    sendResponse(RESPONSES.DISPLAY_SUCCESSFUL_COMPLETED_DIV);
+}
+
+const deleteAllFollowersAndRedirectToProductHunt = (sendResponse: (response?: any) => void) => {
+    chrome.storage.local.remove([STORAGE_KEYS.PRODUCT_HUNT_FOLLOWERS]);
+    chrome.storage.local.remove([STORAGE_KEYS.PRODUCT_HUNT_CURRENT_FOLLOWER_INDEX]);
+    chrome.storage.local.remove([STORAGE_KEYS.TWITTER_DM_TEXT]);
+    window.location.href = "https://www.producthunt.com";
+    sendResponse(RESPONSES.DELETED_ALL_FOLLOWERS);
+}
+
+const displayCanceledCampaignDiv = (sendResponse: (response?: any) => void) => {
+    let div = document.createElement('div');
+
+    // Set the div's style properties
+    div.style.position = 'fixed';
+    div.style.top = '0';
+    div.style.left = '0';
+    div.style.width = '100vw';
+    div.style.height = '100vh';
+    div.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    div.style.color = 'red';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'center';
+    div.style.alignItems = 'center';
+    div.style.zIndex = '1000';
+
+    // Set the div's text
+    div.textContent = 'Successfully canceled campaign';
+
+    // Append the div to the body
+    document.body.appendChild(div);
+    sendResponse(RESPONSES.DISPLAY_CAMPAIGN_CANCELED_DIV);
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -162,9 +195,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         selectTwitterDMTextInput(sendResponse);
     } else if (message.message === MESSAGES.SUCCESSFULLY_MESSAGED_ALL_PRODUCT_HUNT_FOLLOWERS) {
         navigateToProductHunt(sendResponse);
-    } else if (message.message = MESSAGES.DISPLAY_SUCCESSFUL_COMPLETED_DIV) {
-        displaySuccessfulCompletedDiv();
+    } else if (message.message === MESSAGES.DISPLAY_SUCCESSFUL_COMPLETED_DIV) {
+        displaySuccessfulCompletedDiv(sendResponse);
+    } else if (message.message === MESSAGES.DELETE_ALL_FOLLOWERS) {
+        deleteAllFollowersAndRedirectToProductHunt(sendResponse);
+    } else if (message.message === MESSAGES.DISPLAY_CAMPAIGN_CANCELED_DIV) {
+        displayCanceledCampaignDiv(sendResponse);
     }
+
     return true;
 }
 );

@@ -1,3 +1,52 @@
+.launch-buddy-start-btn {
+  background-color: #4CAF50;
+  /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition-duration: 0.4s;
+}
+
+
+.launch-buddy-popup-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-top: 20px;
+}
+
+.launch-buddy-start-btn:hover {
+  background-color: #45a049;
+}
+
+.launch-buddy-cancel-btn {
+  background-color: #f76a60;
+  /* Red */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition-duration: 0.4s;
+}
+
+.launch-buddy-cancel-btn:hover {
+  background-color: #ff1100;
+}
+
 .launch-buddy-popup-container {
   position: absolute;
   top: 0px;
@@ -7,7 +56,7 @@
   text-align: center;
   height: 100%;
   padding: 10px;
-  background-color: #282c34;
+  /* background-color: #282c34; */
   height: 100%;
 }
 
@@ -17,22 +66,18 @@
 }
 
 .launch-buddy-popup-logo {
-  height: 40vmin;
+  height: 20vmin;
   pointer-events: none;
 }
 
 .launch-buddy-app-container {
-  height: 1000px;
+  height: 900px;
 }
 
 button:disabled {
   background-color: #cccccc;
   color: #888888;
   cursor: not-allowed;
-}
-
-.launch-buddy-popup-container__start-button {
-  padding-top: 20px;
 }
 
 .launch-buddy-popup-container__product-url {
@@ -46,6 +91,8 @@ button:disabled {
   justify-content: center;
   gap: 10px;
   margin: auto;
+  height: 100%;
+  width: 100%;
 }
 
 .launch-buddy-popup-container-logo {

@@ -114,10 +114,31 @@ const displaySuccessfulCompletedDiv = async () => {
     }
 }
 
+const deleteAllFollowers = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tab) {
+        const response = await chrome.tabs.sendMessage(tab.id as number, { message: MESSAGES.DELETE_ALL_FOLLOWERS });
+        if (response === RESPONSES.DELETED_ALL_FOLLOWERS) {
+            displayCanceledCampaignDiv();
+        }
+    }
+}
+
+const displayCanceledCampaignDiv = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tab) {
+        const response = await chrome.tabs.sendMessage(tab.id as number, { message: MESSAGES.DISPLAY_CAMPAIGN_CANCELED_DIV });
+        // if (response === RESPONSES.DISPLAY_CAMPAIGN_CANCELED_DIV) {
+
+        // }
+    }
+}
+
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('message:', message);
     if (message.message === MESSAGES.NAVIGATE_TO_PROFILE_SERVICE_WORKER) {
         navigateToProfile(message.twitterDmText);
+    } else if (message.message === MESSAGES.CANCEL_ACTIVE_CAMPAIGN) {
+        deleteAllFollowers();
     }
 });
