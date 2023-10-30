@@ -1,6 +1,6 @@
 <img src="src/assets/img/launching-buddy-logo-128.png" width="64"/>
 
-# Launching Buddy is a Chrome Extension that automatically messages all of your Product Hunt followers with Twitter accounts via Twitter DM
+# Launching Buddy is a Chrome Extension that automatically messages all of your Product Hunt followers Twitter accounts via Twitter DM
 
 <!-- [![npm](https://img.shields.io/npm/v/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)
 [![npm-download](https://img.shields.io/npm/dw/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)

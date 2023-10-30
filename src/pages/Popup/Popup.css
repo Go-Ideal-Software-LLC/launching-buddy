@@ -11,6 +11,11 @@
   height: 100%;
 }
 
+.launch-buddy-text-area {
+  min-height: 280px;
+  min-width: 500px;
+}
+
 .launch-buddy-popup-logo {
   height: 40vmin;
   pointer-events: none;

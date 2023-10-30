@@ -1,7 +1,4 @@
 import { MESSAGES, RESPONSES } from '../../utils/MESSAGES_CONST';
-console.log('This is the background page.');
-console.log('Put the background scripts here.');
-
 
 const navigateToProfile = (twitterDmText: string) => {
     const timeIntervalForNavigatingToProfile = setInterval(async () => {
@@ -40,7 +37,8 @@ const navigateToFollowersProfiles = async () => {
             navigateToFollowersTwitterProfile();
             // do the twitter messaging stuff
         } else if (response === RESPONSES.COMPLETED_ALL_FOLLOWERS) {
-            console.log('completed all followers');
+            console.log('Successfully messaged all followers!');
+            completedMessagingAllFollowers();
         }
     }
 }
@@ -77,8 +75,8 @@ const selectTwitterDMIcon = async () => {
             } else if (response === RESPONSES.NO_TWITTER_DM_ICON_FOUND) {
                 clearInterval(timeIntervalForSelectingTwitterDMIcon);
                 console.log('no twitter dm icon found');
-                navigateToFollowersProfiles();
                 // should navigate back to followers and increment ot the next one
+                navigateToFollowersProfiles();
             }
         }
     }, 3000);
@@ -94,13 +92,27 @@ const sendTwitterDM = () => {
                 clearInterval(timeIntervalForSendingTwitterDM);
                 console.log('sent twitter dm!');
                 navigateToFollowersProfiles();
-                // sendTwitterDM();
             }
         }
     }, 3000);
 }
 
+const completedMessagingAllFollowers = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tab) {
+        const response = await chrome.tabs.sendMessage(tab.id as number, { message: MESSAGES.SUCCESSFULLY_MESSAGED_ALL_PRODUCT_HUNT_FOLLOWERS });
+        if (response === RESPONSES.NAVIGATED_TO_PRODUCT_HUNT) {
+            displaySuccessfulCompletedDiv();
+        }
+    }
+}
 
+const displaySuccessfulCompletedDiv = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tab) {
+        const response = await chrome.tabs.sendMessage(tab.id as number, { message: MESSAGES.DISPLAY_SUCCESSFUL_COMPLETED_DIV });
+    }
+}
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -108,12 +120,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.message === MESSAGES.NAVIGATE_TO_PROFILE_SERVICE_WORKER) {
         navigateToProfile(message.twitterDmText);
     }
-
-    // else if (message.message === MESSAGES.DONE_SAVING_FOLLOWERS) {
-    //     navigateToFollowersProfiles();
-    // }
-
-    // else if (message.message === MESSAGES.NAVIGATE_TO_TWITTER_PROFILE_FROM_PRODUCTHUNT) {
-    //     selectTwitterDMIcon();
-    // }
 });

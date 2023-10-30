@@ -66,6 +66,7 @@ const selectTwitterDMTextInput = async (sendResponse: (response?: any) => void) 
     const rootDiv = document.querySelector(
         ".public-DraftEditorPlaceholder-inner"
     );
+    const sendButton = document.querySelector('[data-testid="dmComposerSendButton"]') as HTMLButtonElement;
     // Simulate a click event on the element
     var event = new MouseEvent("click", {
         bubbles: true,
@@ -73,10 +74,40 @@ const selectTwitterDMTextInput = async (sendResponse: (response?: any) => void) 
         view: window,
     });
     const currentFollowerName = await getCurrentFollowerName();
-    const twitterDM = twitterDMText.replace(/{{FIRST_NAME}}/g, currentFollowerName);
+    let twitterDM = twitterDMText.replace(/{{FIRST_NAME}}/g, currentFollowerName);
+    twitterDM = twitterDM.replace(/\n/g, '<br>');
     rootDiv?.dispatchEvent(event);
-    document.execCommand("insertText", false, twitterDM);
+    document.execCommand("insertHTML", false, twitterDM);
+    sendButton.click();
     sendResponse(RESPONSES.SENT_TWITTER_DM);
+}
+
+const navigateToProductHunt = (sendResponse: (response?: any) => void) => {
+    sendResponse(RESPONSES.NAVIGATED_TO_PRODUCT_HUNT);
+    window.location.href = "https://www.producthunt.com";
+}
+
+const displaySuccessfulCompletedDiv = () => {
+    let div = document.createElement('div');
+
+    // Set the div's style properties
+    div.style.position = 'fixed';
+    div.style.top = '0';
+    div.style.left = '0';
+    div.style.width = '100vw';
+    div.style.height = '100vh';
+    div.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    div.style.color = 'green';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'center';
+    div.style.alignItems = 'center';
+    div.style.zIndex = '1000';
+
+    // Set the div's text
+    div.textContent = 'Successfully messaged all followers';
+
+    // Append the div to the body
+    document.body.appendChild(div);
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -91,8 +122,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse(RESPONSES.SUCCESSFULLY_NAVIGATED_TO_USER_PRODUCTHUNT_PROFILE);
             window.location.href = followerLink;
         }
-    }
-    else if (message.message === MESSAGES.SCROLL_ALL_FOLLOWERS) {
+    } else if (message.message === MESSAGES.SCROLL_ALL_FOLLOWERS) {
         console.log('Content script is scrolling down the page');
         const xpathForFollowerContainerDiv = '//*[@id="__next"]/div[3]/main/div[1]/div[2]';
         let lastFollowerCount = -1;
@@ -122,19 +152,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse(RESPONSES.SAVED_ALL_FOLLOWERS);
             }
         }, 3000);
-    }
-
-    else if (message.message === MESSAGES.NAVIGATE_TO_FOLLOWERS_PROFILES) {
+    } else if (message.message === MESSAGES.NAVIGATE_TO_FOLLOWERS_PROFILES) {
         navigateToFollowerProfile(sendResponse);
-    }
-    else if (message.message === MESSAGES.NAVIGATE_TO_TWITTER_PROFILE) {
+    } else if (message.message === MESSAGES.NAVIGATE_TO_TWITTER_PROFILE) {
         navigateToTwitterProfile(sendResponse);
-    }
-    else if (message.message === MESSAGES.SELECT_TWITTER_DM_ICON) {
+    } else if (message.message === MESSAGES.SELECT_TWITTER_DM_ICON) {
         selectTwitterDMIcon(sendResponse);
-    }
-    else if (message.message === MESSAGES.SEND_TWITTER_DM) {
+    } else if (message.message === MESSAGES.SEND_TWITTER_DM) {
         selectTwitterDMTextInput(sendResponse);
+    } else if (message.message === MESSAGES.SUCCESSFULLY_MESSAGED_ALL_PRODUCT_HUNT_FOLLOWERS) {
+        navigateToProductHunt(sendResponse);
+    } else if (message.message = MESSAGES.DISPLAY_SUCCESSFUL_COMPLETED_DIV) {
+        displaySuccessfulCompletedDiv();
     }
     return true;
 }
