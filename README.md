@@ -57,4 +57,4 @@ Built with TypeScript!
 
 ---
 
-Launching Buddy | [Website](https://launchingbuddy.com)
+Launching Buddy | [Website](https://launchingbuddy.com) | [Request Forms](https://requestforms.io)

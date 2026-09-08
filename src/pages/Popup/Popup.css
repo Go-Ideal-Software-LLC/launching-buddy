@@ -84,6 +84,22 @@ button:disabled {
   padding-top: 20px;
 }
 
+.launch-buddy-popup-footer {
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 13px;
+  color: #666666;
+}
+
+.launch-buddy-popup-footer a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.launch-buddy-popup-footer a:hover {
+  text-decoration: underline;
+}
+
 .launch-buddy-popup-container {
   display: flex;
   flex-direction: column;

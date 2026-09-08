@@ -18,6 +18,11 @@ const Popup = () => {
     chrome.runtime.sendMessage({ message: MESSAGES.CANCEL_ACTIVE_CAMPAIGN });
   }
 
+  const openRequestForms = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    chrome.tabs.create({ url: 'https://requestforms.io' });
+  };
+
   const onProductURLChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setTwitterDMMessage(event.target.value);
     chrome.storage.local.set({ [STORAGE_KEYS.TWITTER_DM_TEXT_POPUP]: event.target.value });
@@ -55,6 +60,17 @@ Rami" value={twitterDMMessage} onChange={(event) => onProductURLChange(event)}><
           <button className='launch-buddy-cancel-btn' onClick={(event) => cancelActiveCampaign()}>Cancel Campaign</button>
         </div>
       </div>
+      <footer className="launch-buddy-popup-footer">
+        Also try{' '}
+        <a
+          href="https://requestforms.io"
+          target="_blank"
+          rel="noopener"
+          onClick={(event) => openRequestForms(event)}
+        >
+          Request Forms
+        </a>
+      </footer>
     </div>
   );
 };
