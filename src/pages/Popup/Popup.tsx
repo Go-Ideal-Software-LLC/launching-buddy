@@ -18,9 +18,9 @@ const Popup = () => {
     chrome.runtime.sendMessage({ message: MESSAGES.CANCEL_ACTIVE_CAMPAIGN });
   }
 
-  const openRequestForms = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const openExternalLink = (event: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     event.preventDefault();
-    chrome.tabs.create({ url: 'https://requestforms.io' });
+    chrome.tabs.create({ url });
   };
 
   const onProductURLChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -66,9 +66,18 @@ Rami" value={twitterDMMessage} onChange={(event) => onProductURLChange(event)}><
           href="https://requestforms.io"
           target="_blank"
           rel="noopener"
-          onClick={(event) => openRequestForms(event)}
+          onClick={(event) => openExternalLink(event, 'https://requestforms.io')}
         >
           Request Forms
+        </a>
+        {' | '}
+        <a
+          href="https://ramisoftware.com"
+          target="_blank"
+          rel="noopener"
+          onClick={(event) => openExternalLink(event, 'https://ramisoftware.com')}
+        >
+          Rami Software
         </a>
       </footer>
     </div>
